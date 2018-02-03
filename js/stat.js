@@ -8,10 +8,13 @@ var GAP = 20;
 var BAR_GAP = 50;
 var BAR_WIDTH = 40;
 var MAX_BAR_HEIGHT = 140;
+var barHeight;
+var coordinateX;
+var topGap;
 
 var renderCloud = function (ctx, x, y, colorShadow, colorCloud) {
   ctx.fillStyle = colorShadow;
-  ctx.fillRect(x + GAP / 2, y + GAP / 2, CLOUD_WIDTH, CLOUD_HEIGHT);
+  ctx.fillRect(x + 10, y + 10, CLOUD_WIDTH, CLOUD_HEIGHT);
   ctx.fillStyle = colorCloud;
   ctx.fillRect(x, y, CLOUD_WIDTH, CLOUD_HEIGHT);
 };
@@ -23,13 +26,31 @@ var getRandomNumber = function (min, max) {
 var getMaxElement = function (arr) {
   var maxElement = arr[0];
 
-  for (var i = 0; i < arr.length; i++) {
+  for (var i = 1; i < arr.length; i++) {
     if (arr[i] > maxElement) {
       maxElement = arr[i];
     }
   }
 
   return maxElement;
+};
+
+var renderText = function (ctx, time, name) {
+  ctx.fillStyle = '#000000';
+  ctx.fillText(Math.round(time), coordinateX, GAP * 4 + topGap);
+  ctx.fillText(name, coordinateX, MAX_BAR_HEIGHT + GAP * 5.5);
+};
+
+var getColor = function (ctx, name) {
+  if (name === 'Вы') {
+    ctx.fillStyle = 'rgba(255, 0, 0, 1)';
+  } else {
+    ctx.fillStyle = 'rgba(0, 77, 255, ' + getRandomNumber(0.1, 1) + ')';
+  }
+};
+
+var renderBar = function (ctx) {
+  ctx.fillRect(coordinateX, GAP * 5 + topGap, BAR_WIDTH, barHeight);
 };
 
 window.renderStatistics = function (ctx, names, times) {
@@ -44,18 +65,14 @@ window.renderStatistics = function (ctx, names, times) {
   var maxTime = getMaxElement(times);
 
   for (var i = 0; i < names.length; i++) {
-    var barHeight = (MAX_BAR_HEIGHT * times[i]) / maxTime;
+    barHeight = (MAX_BAR_HEIGHT * times[i]) / maxTime;
+    coordinateX = CLOUD_X + GAP * 2 + (BAR_WIDTH + BAR_GAP) * i;
+    topGap = MAX_BAR_HEIGHT - barHeight;
 
-    ctx.fillStyle = '#000000';
-    ctx.fillText(Math.round(times[i]), CLOUD_X + GAP * 2 + (BAR_WIDTH + BAR_GAP) * i, (GAP * 4) + (MAX_BAR_HEIGHT - barHeight));
-    ctx.fillText(names[i], CLOUD_X + GAP * 2 + (BAR_WIDTH + BAR_GAP) * i, MAX_BAR_HEIGHT + GAP * 5.5);
+    renderText(ctx, times[i], names[i]);
 
-    if (names[i] === 'Вы') {
-      ctx.fillStyle = 'rgba(255, 0, 0, 1)';
-    } else {
-      ctx.fillStyle = 'rgba(0, 77, 255, ' + getRandomNumber(0.1, 1) + ')';
-    }
+    getColor(ctx, names[i]);
 
-    ctx.fillRect(CLOUD_X + GAP * 2 + (BAR_WIDTH + BAR_GAP) * i, (GAP * 5) + (MAX_BAR_HEIGHT - barHeight), BAR_WIDTH, barHeight);
+    renderBar(ctx);
   }
 };
