@@ -8,16 +8,6 @@ var GAP = 20;
 var BAR_GAP = 50;
 var BAR_WIDTH = 40;
 var MAX_BAR_HEIGHT = 140;
-var barHeight;
-var coordinateX;
-var topGap;
-
-var renderCloud = function (ctx, x, y, colorShadow, colorCloud) {
-  ctx.fillStyle = colorShadow;
-  ctx.fillRect(x + 10, y + 10, CLOUD_WIDTH, CLOUD_HEIGHT);
-  ctx.fillStyle = colorCloud;
-  ctx.fillRect(x, y, CLOUD_WIDTH, CLOUD_HEIGHT);
-};
 
 var getRandomNumber = function (min, max) {
   return Math.random() * (max - min) + min;
@@ -35,26 +25,31 @@ var getMaxElement = function (arr) {
   return maxElement;
 };
 
-var renderText = function (ctx, time, name) {
-  ctx.fillStyle = '#000000';
-  ctx.fillText(Math.round(time), coordinateX, GAP * 4 + topGap);
-  ctx.fillText(name, coordinateX, MAX_BAR_HEIGHT + GAP * 5.5);
+var renderText = function (ctx, text, x, y, color) {
+  ctx.fillStyle = color;
+  ctx.fillText(text, x, y);
 };
 
-var getColor = function (ctx, name) {
+var getColor = function (name) {
   if (name === 'Вы') {
-    ctx.fillStyle = 'rgba(255, 0, 0, 1)';
-  } else {
-    ctx.fillStyle = 'rgba(0, 77, 255, ' + getRandomNumber(0.1, 1) + ')';
+    return 'rgba(255, 0, 0, 1)';
   }
+
+  return 'rgba(0, 77, 255, ' + getRandomNumber(0.1, 1) + ')';
 };
 
-var renderBar = function (ctx) {
-  ctx.fillRect(coordinateX, GAP * 5 + topGap, BAR_WIDTH, barHeight);
+var renderBar = function (ctx, x, y, width, height, color) {
+  ctx.fillStyle = color;
+  ctx.fillRect(x, y, width, height);
+};
+
+var renderCloud = function (ctx) {
+  renderBar(ctx, CLOUD_X + 10, CLOUD_Y + 10, CLOUD_WIDTH, CLOUD_HEIGHT, 'rgba(0, 0, 0, 0.7)');
+  renderBar(ctx, CLOUD_X, CLOUD_Y, CLOUD_WIDTH, CLOUD_HEIGHT, '#ffffff');
 };
 
 window.renderStatistics = function (ctx, names, times) {
-  renderCloud(ctx, CLOUD_X, CLOUD_Y, 'rgba(0, 0, 0, 0.7)', '#ffffff');
+  renderCloud(ctx);
 
   ctx.fillStyle = '#000000';
   ctx.font = '16px PT Mono';
@@ -65,14 +60,13 @@ window.renderStatistics = function (ctx, names, times) {
   var maxTime = getMaxElement(times);
 
   for (var i = 0; i < names.length; i++) {
-    barHeight = (MAX_BAR_HEIGHT * times[i]) / maxTime;
-    coordinateX = CLOUD_X + GAP * 2 + (BAR_WIDTH + BAR_GAP) * i;
-    topGap = MAX_BAR_HEIGHT - barHeight;
+    var barHeight = (MAX_BAR_HEIGHT * times[i]) / maxTime;
+    var coordinateX = CLOUD_X + GAP * 2 + (BAR_WIDTH + BAR_GAP) * i;
+    var topGap = MAX_BAR_HEIGHT - barHeight;
 
-    renderText(ctx, times[i], names[i]);
+    renderText(ctx, Math.round(times[i]), coordinateX, GAP * 4 + topGap, '#000000');
+    renderText(ctx, names[i], coordinateX, MAX_BAR_HEIGHT + GAP * 5.5, '#000000');
 
-    getColor(ctx, names[i]);
-
-    renderBar(ctx);
+    renderBar(ctx, coordinateX, GAP * 5 + topGap, BAR_WIDTH, barHeight, getColor(names[i]));
   }
 };
